@@ -11,15 +11,15 @@ data_url = "https://raw.githubusercontent.com/emonsharkar/AI-Health-Assistant/ma
 # Load the dataset directly from GitHub
 data = pd.read_csv(data_url)
 
-# Handle missing values and infinite values
+# Handle missing values
 if data.isnull().sum().any():
     st.warning("Dataset contains missing values! Handling them now.")
     
-    # Identify numeric columns and fill missing values with median
+    # Identify numeric columns and fill missing values with 0 or the median
     numeric_columns = data.select_dtypes(include=[np.number]).columns
-    data[numeric_columns] = data[numeric_columns].fillna(data[numeric_columns].median())
-    
-    # For categorical columns, fill missing values with mode (most frequent value)
+    data[numeric_columns] = data[numeric_columns].fillna(0)  # Filling numeric columns with 0 or use .median()
+
+    # For categorical columns, fill missing values with the most frequent value (mode)
     categorical_columns = data.select_dtypes(exclude=[np.number]).columns
     for column in categorical_columns:
         data[column] = data[column].fillna(data[column].mode()[0])  # Fill with the most frequent value
@@ -28,7 +28,7 @@ else:
 
 # Replace infinite values with NaN, and then handle them
 data.replace([np.inf, -np.inf], np.nan, inplace=True)
-data = data.fillna(data.median())  # You can replace with mode or other strategies
+data = data.fillna(0)  # Fill infinite values with 0 or any other strategy
 
 # Check the data types
 st.write(data.dtypes)
@@ -96,4 +96,3 @@ else:
 st.sidebar.header("Health Risk Level")
 health_risk = model.predict_proba(input_data)
 st.sidebar.write(f"Probability of requiring hospitalization: {health_risk[0][1]*100:.2f}%")
-
