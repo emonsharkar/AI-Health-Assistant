@@ -31,6 +31,7 @@ data.replace([np.inf, -np.inf], np.nan, inplace=True)
 data = data.fillna(0)  # Fill infinite values with 0 or any other strategy
 
 # Ensure all data used in the model is numeric
+# Force conversion of all columns to numeric
 data = data.apply(pd.to_numeric, errors='coerce')  # Convert everything to numeric, coercing errors to NaN
 data = data.fillna(0)  # Fill any resulting NaNs with 0
 
@@ -98,4 +99,3 @@ else:
 st.sidebar.header("Health Risk Level")
 health_risk = model.predict_proba(input_data)
 st.sidebar.write(f"Probability of requiring hospitalization: {health_risk[0][1]*100:.2f}%")
-
