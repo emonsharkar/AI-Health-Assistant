@@ -14,7 +14,15 @@ data = pd.read_csv(data_url)
 # Handle missing values and infinite values
 if data.isnull().sum().any():
     st.warning("Dataset contains missing values! Handling them now.")
-    data = data.fillna(data.median())  # For numerical columns
+    
+    # Identify numeric columns and fill missing values with median
+    numeric_columns = data.select_dtypes(include=[np.number]).columns
+    data[numeric_columns] = data[numeric_columns].fillna(data[numeric_columns].median())
+    
+    # For categorical columns, fill missing values with mode (most frequent value)
+    categorical_columns = data.select_dtypes(exclude=[np.number]).columns
+    for column in categorical_columns:
+        data[column] = data[column].fillna(data[column].mode()[0])  # Fill with the most frequent value
 else:
     st.success("No missing values detected.")
 
