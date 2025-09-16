@@ -96,3 +96,4 @@ else:
 st.sidebar.header("Health Risk Level")
 health_risk = model.predict_proba(input_data)
 st.sidebar.write(f"Probability of requiring hospitalization: {health_risk[0][1]*100:.2f}%")
+
