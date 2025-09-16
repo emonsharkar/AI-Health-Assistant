@@ -11,6 +11,20 @@ data_url = "https://raw.githubusercontent.com/emonsharkar/AI-Health-Assistant/ma
 # Load the dataset directly from GitHub
 data = pd.read_csv(data_url)
 
+# Handle missing values and infinite values
+if data.isnull().sum().any():
+    st.warning("Dataset contains missing values! Handling them now.")
+    data = data.fillna(data.median())  # For numerical columns
+else:
+    st.success("No missing values detected.")
+
+# Replace infinite values with NaN, and then handle them
+data.replace([np.inf, -np.inf], np.nan, inplace=True)
+data = data.fillna(data.median())  # You can replace with mode or other strategies
+
+# Check the data types
+st.write(data.dtypes)
+
 # Data Preprocessing (handling categorical variables)
 label_encoder = LabelEncoder()
 data['Gender'] = label_encoder.fit_transform(data['Gender'])
