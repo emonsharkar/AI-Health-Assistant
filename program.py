@@ -30,23 +30,20 @@ else:
 data.replace([np.inf, -np.inf], np.nan, inplace=True)
 data = data.fillna(0)  # Fill infinite values with 0 or any other strategy
 
+# Ensure all data used in the model is numeric
+data = data.apply(pd.to_numeric, errors='coerce')  # Convert everything to numeric, coercing errors to NaN
+data = data.fillna(0)  # Fill any resulting NaNs with 0
+
 # Check the data types
 st.write(data.dtypes)
 
 # Data Preprocessing (handling categorical variables)
 label_encoder = LabelEncoder()
-data['Gender'] = label_encoder.fit_transform(data['Gender'])
-data['Location'] = label_encoder.fit_transform(data['Location'])
-data['Ethnicity'] = label_encoder.fit_transform(data['Ethnicity'])
-data['SES'] = label_encoder.fit_transform(data['SES'])
-data['Medical_History'] = label_encoder.fit_transform(data['Medical_History'])
-data['Vaccination_Status'] = label_encoder.fit_transform(data['Vaccination_Status'])
-data['Immunity_Level'] = label_encoder.fit_transform(data['Immunity_Level'])
-data['Reported_Symptoms'] = label_encoder.fit_transform(data['Reported_Symptoms'])
-data['Outbreak_Status'] = label_encoder.fit_transform(data['Outbreak_Status'])
-data['Infection_Risk_Level'] = label_encoder.fit_transform(data['Infection_Risk_Level'])
-data['Disease_Severity'] = label_encoder.fit_transform(data['Disease_Severity'])
-data['Hospitalization_Requirement'] = label_encoder.fit_transform(data['Hospitalization_Requirement'])
+
+# Only encode categorical columns if they are still objects after the conversion
+categorical_columns = data.select_dtypes(include=['object']).columns
+for column in categorical_columns:
+    data[column] = label_encoder.fit_transform(data[column])
 
 # Define features and target
 X = data.drop(['Hospitalization_Requirement'], axis=1)
@@ -57,7 +54,12 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 
 # Initialize Random Forest Classifier
 model = RandomForestClassifier(n_estimators=100)
-model.fit(X_train, y_train)
+
+try:
+    # Try fitting the model
+    model.fit(X_train, y_train)
+except Exception as e:
+    st.error(f"Error during model fitting: {e}")
 
 # User Input Form for prediction
 st.sidebar.header("Enter Your Health Details")
